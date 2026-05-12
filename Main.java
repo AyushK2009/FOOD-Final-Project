@@ -24,10 +24,7 @@ public class Main {
         Planet location = Planet.EARTH;
         Planet destination = Planet.MARS;
 
-        if (locationChoice < 1 || locationChoice > 3) {
-            System.out.println("Invalid choice. Please select a valid location.");
-            return;
-        } else if (locationChoice == 1) {
+        if (locationChoice == 1) {
             System.out.println("You have selected Earth.");
             location = Planet.EARTH;
         } else if (locationChoice == 2) {
@@ -45,25 +42,7 @@ public class Main {
         int destinationChoice = sc.nextInt();
 
 
-        if (destinationChoice == locationChoice) {
-            System.out.println("You are already at your destination.");
-            return;
-        } else if (destinationChoice == 1) {
-            System.out.println("You have selected Earth.");
-            destination = Planet.EARTH;
-        } else if (destinationChoice == 2) {
-            System.out.println("You have selected the Moon.");
-            destination = Planet.MOON;
-        } else if (destinationChoice == 3) {
-            System.out.println("You have selected Mars.");
-            destination = Planet.MARS;
-        }
-
-
-        if (destinationChoice < 1 || destinationChoice > 3) {
-            System.out.println("Invalid choice. Please select a valid destination.");
-            return;
-        } else if (destinationChoice == 1) {
+        if (destinationChoice == 1) {
             System.out.println("You have selected Earth.");
             destination = Planet.EARTH;
         } else if (destinationChoice == 2) {
