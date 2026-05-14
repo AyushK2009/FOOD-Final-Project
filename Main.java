@@ -106,7 +106,7 @@ public class Main {
 
 
         // Simulation code goes under here:
-
-
+        Simulate sim = new Simulate(location, destination, fuel, Grav, ForceAir);
+        sim.run();
     }
 }
