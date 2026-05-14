@@ -167,8 +167,7 @@ public class Simulate {
         return 1.0;
     }
 
-    // Print a summary at the end + a sampled view of the trajectory. All position
-    // and time values are scaled to realistic real-world units for the user.
+    // Print a summary at the end and a sampled view of the trajectory. All values are scaled up to realistic real-world units for the user to easily interpret
     private void printSummary(double endTime) {
         System.out.println();
         System.out.println("--- Simulation Summary ---");
