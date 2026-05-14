@@ -71,7 +71,7 @@ public class Simulate {
                 fThrust = 0.0;
                 fGravity = 0.0;
             } else {
-                // Landing stage: engine remains off, but destination's gravity pulls rocket toward the surface while (sometimes) drag opposes motion.
+                // Landing stage: engine remains off, but destination's gravity pulls rocket toward the surface while (sometimes) drag opposes motion
                 fThrust = 0.0;
                 fGravity = m * gravity;
             }
@@ -156,9 +156,7 @@ public class Simulate {
         return 0.0;
     }
 
-    // The values here scale up the final time and distance according to the takeoff/landing locations, so the output and graphs look realistic.
-    // Velocity is left unscaled because scaling both distance and time by the
-    // same factor cancels out (v = pos/time).
+    // The values here scale up the final time and distance according to the takeoff/landing locations, so the output and graphs look realistic
     private double displayScaleFor(Main.Planet from, Main.Planet to) {
         if (from == Main.Planet.EARTH && to == Main.Planet.MOON)  return 384.0;
         if (from == Main.Planet.MOON  && to == Main.Planet.EARTH) return 384.0;
