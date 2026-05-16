@@ -47,8 +47,7 @@ public class Simulate {
             // We don't need to "manually" redefine drag within the stage loops, since it is already being modified by the airDensity variable
             double fDrag = -0.5 * airDensity * dragCoefficient * crossArea * v * Math.abs(v);
 
-            // The Stage enum knows how its forces combine, so we just hand it
-            // the four ingredients and get back the net force for this stage.
+            // The Stage enum calculates the net force for the current state
             double netForce = stage.calculateForce(m, gravity, fDrag, thrustForce);
 
             // Fuel is used only during the launch stage, since it's the only stage with thrust

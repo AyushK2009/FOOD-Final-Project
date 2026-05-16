@@ -1,13 +1,8 @@
 public class States {
 
-    // The threshold (in meters) used to decide when state transitions happen.
-    // Above this altitude the rocket has "left the atmosphere"; within this
-    // distance of the destination it's "entered" the destination's atmosphere.
-    public static final double atmosphereTop = 100000.0;
+    public static final double atmosphereTop = 100000.0; // m, decides when state transitions happen
 
-    // Each Planet carries its own physical constants. Looking up
-    // EARTH.getGravity() returns 9.8 directly, so we don't need separate
-    // lookup tables. (Sources for the values are in Documentation.md.)
+    // Each Planet is assigned its own physical constants accoridng to the accepted physics values
     public enum Planet {
         EARTH(9.8, 1.225),
         MOON(1.6, 0.0),
@@ -26,22 +21,23 @@ public class States {
         public double getAirDensity() {return airDensity; }
     }
 
-    // The Stage enum knows how to combine the three forces for its own stage.
-    // Simulate just passes in the four ingredients and the right combination
-    // comes back out, so we don't need an if-ladder in Simulate.run().
     public enum Stage {
-        ONE, TWO, THREE;
+        ONE, TWO, THREE; // Liftoff, cruise, landing
 
+        // Calculates net force to be used within simulation. This way, simulation doesn't need a bunch of if statements checking the stage and corresponding force
         public double calculateForce(double mass, double gravity, double drag, double thrust) {
-            if (this == ONE) {
-                // Launch: thrust forward, gravity back, drag opposing motion
-                return thrust - (mass * gravity) + drag;
-            } else if (this == TWO) {
-                // Cruise: coast through space, no forces
-                return 0.0;
-            } else {
-                // Landing: gravity pulls toward destination, drag opposes motion
-                return (mass * gravity) + drag;
+            switch (this) {
+                case ONE:
+                    // Launch: thrust forward, gravity back, drag back
+                    return thrust - (mass * gravity) + drag;
+                case TWO:
+                    // Cruise: no forces in space
+                    return 0.0;
+                case THREE:
+                    // Landing: gravity pulls toward destination, drag opposes motion
+                    return (mass * gravity) + drag;
+                default:
+                    return 0.0;
             }
         }
     }
@@ -63,15 +59,15 @@ public class States {
         this.displayScale = displayScaleFor(location, destination);
     }
 
-    // Called by Simulate every step. Checks whether a state transition should
-    // happen given the rocket's current position, and if so, updates the state
-    // fields and announces the transition.
+    // Called by Simulate every time step. Checks whet
     public void updateState(double position, double currentTime) {
+        // Takeoff to Crusie transition
         if (stage == Stage.ONE && position > atmosphereTop) {
             stage = Stage.TWO;
             location = Planet.SPACE;
             System.out.println("Reached " + location + " at t = "
                     + (currentTime * displayScale) + " s. Cruise phase started.");
+        // Cruise to Landing transition
         } else if (stage == Stage.TWO && position > tripDistance - atmosphereTop) {
             stage = Stage.THREE;
             location = destination;
@@ -80,9 +76,7 @@ public class States {
         }
     }
 
-    // Getters that Simulate uses to read the current state. Gravity and air
-    // density are pulled directly off the current Planet, so they're always
-    // in sync with location with no manual update needed.
+    // Getters
     public Planet getLocation() {return location; }
     public Planet getDestination() {return destination; }
     public Stage  getStage() {return stage; }
@@ -91,7 +85,7 @@ public class States {
     public double getTripDistance() {return tripDistance; }
     public double getDisplayScale() {return displayScale; }
 
-    // Compressed internal trip distances (see Documentation.md for why).
+    // Compressed internal trip distances
     private double tripDistanceFor(Planet from, Planet to) {
         if (from == Planet.EARTH && to == Planet.MOON)  return 1000000.0;
         if (from == Planet.MOON  && to == Planet.EARTH) return 1000000.0;
@@ -102,8 +96,7 @@ public class States {
         return 0.0;
     }
 
-    // Per-trip multiplier that converts internal compact units into realistic
-    // real-world units for the user-facing output.
+    // Per-trip multiplier that converts the scaled down time and position into realistic (t, pos) cooridnates
     private double displayScaleFor(Planet from, Planet to) {
         if (from == Planet.EARTH && to == Planet.MOON)  return 384.0;
         if (from == Planet.MOON  && to == Planet.EARTH) return 384.0;
