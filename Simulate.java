@@ -8,22 +8,15 @@ public class Simulate {
     public static final double dragCoefficient = 0.75;   // unitless
     public static final double thrustForce = 1500000.0;  // Newtons (launch only)
     public static final double burnRate = 5.0;           // liters of fuel per second
-    public static final double atmosphereTop = 100000.0; // m
 
     // Simulation timing
     public static final double dt = 0.1;       // internal time step in seconds
-    public static final double tMax = 100000;  // safety cap on sim time    
+    public static final double tMax = 100000;  // safety cap on sim time
 
-    // State-based variables
-    private Main.Planet location;
-    private Main.Planet destination;
-    private Main.Stage stage;
+    // The simulation owns a rocket and consults a States object for everything
+    // related to the state machine (current stage, gravity, air density, etc).
     private Rocket rocket;
-
-    private double gravity;      // m/s^2, magnitude of current planet's gravity
-    private double airDensity;   // kg/m^3, current planet's air density
-    private double tripDistance; // meters, total distance for this trip (internal units)
-    private double displayScale; // multiplier to convert internal pos/time -> real-world units
+    private States states;
 
     // Data collected each step, used later for graphing and summary
     private ArrayList<Double> times = new ArrayList<Double>();
@@ -35,51 +28,31 @@ public class Simulate {
     private boolean crashed = false;
     private boolean landed = false;
 
-    public Simulate(Main.Planet location, Main.Planet destination, double fuel,
-                    double startGravity, double startAirDensity) {
-        this.location = location;
-        this.destination = destination;
-        this.stage = Main.Stage.ONE;
+    public Simulate(States states, double fuel) {
+        this.states = states;
         this.rocket = new Rocket(rocketMass, fuel);
-        this.gravity = startGravity;
-        this.airDensity = startAirDensity;
-        this.tripDistance = tripDistanceFor(location, destination);
-        this.displayScale = displayScaleFor(location, destination);
     }
 
     public void run() {
         double t = 0.0;
 
         // Loop until the rocket has covered the trip distance, or we hit the safety cap (only in case of bug).
-        while (rocket.getPosition() < tripDistance && t < tMax) {
+        while (rocket.getPosition() < states.getTripDistance() && t < tMax) {
             double v = rocket.getVelocity();
             double m = rocket.getMass();
+            double gravity = states.getGravity();
+            double airDensity = states.getAirDensity();
+            States.Stage stage = states.getStage();
 
             // We don't need to "manually" redefine drag within the stage loops, since it is already being modified by the airDensity variable
             double fDrag = -0.5 * airDensity * dragCoefficient * crossArea * v * Math.abs(v);
-            
-            // These forces will be different depdening on which stage we're in
-            double fGravity;
-            double fThrust;
 
-            if (stage == Main.Stage.ONE) {
-                // Launch stage: the thrust pushes rocket away from surface, while the force of gravity and (sometimes) drag pulls it back
-                fThrust = thrustForce;
-                fGravity = -m * gravity;
-            } else if (stage == Main.Stage.TWO) {
-                // Cruise stage: coast through space, no forces
-                fThrust = 0.0;
-                fGravity = 0.0;
-            } else {
-                // Landing stage: engine remains off, but destination's gravity pulls rocket toward the surface while (sometimes) drag opposes motion
-                fThrust = 0.0;
-                fGravity = m * gravity;
-            }
-
-            double netForce = fThrust + fGravity + fDrag;
+            // The Stage enum knows how its forces combine, so we just hand it
+            // the four ingredients and get back the net force for this stage.
+            double netForce = stage.calculateForce(m, gravity, fDrag, thrustForce);
 
             // Fuel is used only during the launch stage, since it's the only stage with thrust
-            if (stage == Main.Stage.ONE) {
+            if (stage == States.Stage.ONE) {
                 rocket.burnFuel(burnRate * dt);
             }
 
@@ -93,26 +66,14 @@ public class Simulate {
             accelerations.add(rocket.getAcceleration());
 
             // Fuel check: fuel only burns in stage 1, so this only triggers here
-            if (rocket.getFuel() <= 0 && stage == Main.Stage.ONE) {
+            if (rocket.getFuel() <= 0 && stage == States.Stage.ONE) {
                 crashed = true;
                 System.out.println("Rocket crashed: ran out of fuel before reaching space! Try again :(");
                 break;
             }
 
-            // State transition thresholds
-            if (stage == Main.Stage.ONE && rocket.getPosition() > atmosphereTop) {
-                stage = Main.Stage.TWO;
-                location = Main.Planet.SPACE;
-                gravity = 0.0;
-                airDensity = 0.0;
-                System.out.println("Reached " + location + " at t = " + (t * displayScale) + " s. Cruise phase started.");
-            } else if (stage == Main.Stage.TWO && rocket.getPosition() > tripDistance - atmosphereTop) {
-                stage = Main.Stage.THREE;
-                location = destination;
-                gravity = gravityFor(location);
-                airDensity = airDensityFor(location);
-                System.out.println("Approaching " + location + " at t = " + (t * displayScale) + " s. Entering atmosphere.");
-            }
+            // States object checks if a transition should occur.
+            states.updateState(rocket.getPosition(), t);
 
             t = t + dt;
         }
@@ -120,63 +81,25 @@ public class Simulate {
         // If we exited the loop without crashing, the rocket reached the destination
         if (!crashed) {
             landed = true;
-            System.out.println("Mission successful! Reached " + destination
-                    + " at t = " + (t * displayScale) + " s.");
+            System.out.println("Mission successful! Reached " + states.getDestination()
+                    + " at t = " + (t * states.getDisplayScale()) + " s.");
         }
 
         printSummary(t);
     }
 
-    // Helper methods that define the per-planet constants defined by the stage
-
-    // Look up gravity for a given planet.
-    private double gravityFor(Main.Planet p) {
-        if (p == Main.Planet.EARTH) return 9.8;
-        if (p == Main.Planet.MOON)  return 1.6;
-        if (p == Main.Planet.MARS)  return 3.7;
-        return 0.0; // SPACE
-    }
-
-    // Look up air density for a given planet.
-    private double airDensityFor(Main.Planet p) {
-        if (p == Main.Planet.EARTH) return 1.225;
-        if (p == Main.Planet.MOON)  return 0.0;
-        if (p == Main.Planet.MARS)  return 0.020;
-        return 0.0; // SPACE
-    }
-
-    // We scale down trip distance because real values would be much larger. The displayScale converts these back to realistic distances at print time
-    private double tripDistanceFor(Main.Planet from, Main.Planet to) {
-        if (from == Main.Planet.EARTH && to == Main.Planet.MOON)  return 1000000.0;
-        if (from == Main.Planet.MOON  && to == Main.Planet.EARTH) return 1000000.0;
-        if (from == Main.Planet.EARTH && to == Main.Planet.MARS)  return 5000000.0;
-        if (from == Main.Planet.MARS  && to == Main.Planet.EARTH) return 5000000.0;
-        if (from == Main.Planet.MOON  && to == Main.Planet.MARS)  return 5000000.0;
-        if (from == Main.Planet.MARS  && to == Main.Planet.MOON)  return 5000000.0;
-        return 0.0;
-    }
-
-    // The values here scale up the final time and distance according to the takeoff/landing locations, so the output and graphs look realistic
-    private double displayScaleFor(Main.Planet from, Main.Planet to) {
-        if (from == Main.Planet.EARTH && to == Main.Planet.MOON)  return 384.0;
-        if (from == Main.Planet.MOON  && to == Main.Planet.EARTH) return 384.0;
-        if (from == Main.Planet.EARTH && to == Main.Planet.MARS)  return 16000.0;
-        if (from == Main.Planet.MARS  && to == Main.Planet.EARTH) return 16000.0;
-        if (from == Main.Planet.MOON  && to == Main.Planet.MARS)  return 16000.0;
-        if (from == Main.Planet.MARS  && to == Main.Planet.MOON)  return 16000.0;
-        return 1.0;
-    }
-
     // Print a summary at the end and a sampled view of the trajectory. All values are scaled up to realistic real-world units for the user to easily interpret
     private void printSummary(double endTime) {
+        double scale = states.getDisplayScale();
+
         System.out.println();
-        System.out.println("--- Simulation Summary ---");
-        System.out.println("Total time:       " + (endTime * displayScale) + " s");
-        System.out.println("Final position:   " + (rocket.getPosition() * displayScale) + " m");
+        System.out.println("Simulation Summary");
+        System.out.println("Total time:       " + (endTime * scale) + " s");
+        System.out.println("Final position:   " + (rocket.getPosition() * scale) + " m");
         System.out.println("Final velocity:   " + rocket.getVelocity() + " m/s"); // The neat thing is that velocity doesn't need to be scaled because scaling both distance and time by the same factor cancels out
         System.out.println("Fuel remaining:   " + rocket.getFuel() + " L");
         if (landed) {
-            System.out.println("Status:           Landed on " + destination);
+            System.out.println("Status:           Landed on " + states.getDestination());
         } else if (crashed) {
             System.out.println("Status:           Crashed (out of fuel)");
         } else {
@@ -190,7 +113,7 @@ public class Simulate {
         int interval = times.size() / 20;
         if (interval < 1) interval = 1;
         for (int i = 0; i < times.size(); i = i + interval) {
-            System.out.println((times.get(i) * displayScale) + "\t" + (positions.get(i) * displayScale) + "\t" + velocities.get(i) + "\t" + accelerations.get(i));
+            System.out.println((times.get(i) * scale) + "\t" + (positions.get(i) * scale) + "\t" + velocities.get(i) + "\t" + accelerations.get(i));
         }
     }
 }
