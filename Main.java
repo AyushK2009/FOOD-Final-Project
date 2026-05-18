@@ -27,6 +27,7 @@ public class Main {
                 States states = new States(location, destination);
                 Simulate simulation = new Simulate(states, fuelInput);
                 simulation.run();
+                simulation.printConsoleGraph();
 
                 // Here you would add code to display results and graphs based on the collected data in the Simulate class.
 
