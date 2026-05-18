@@ -4,11 +4,11 @@ Our project is a physics-based simulation of a rocket going through space from t
 
 ## Features
 
-User inputted start and end location for the rocket, along with the fuel the rocket has for the journey.
-A detailed list of when the rocket does things like exit orbit, re-enter orbit, and land.
-Printed results on if the rocket successfully made it to it's destination.
-A graph showing the path of the rocket on a 1D scale.
-Tracks the usage of fuel and crashes the ship if it ever reaches 0.
+1. User inputted start and end location for the rocket, along with the fuel the rocket has for the journey.
+2. A detailed list of when the rocket does things like exit orbit, re-enter orbit, and land.
+3. Printed results on if the rocket successfully made it to it's destination.
+4. A graph showing the path of the rocket on a 1D scale.
+5. Tracks the usage of fuel and crashes the ship if it ever reaches 0.
 > This has been done differently than mentioned in the proposal, now use a method in simulation while the state is in STAGE ONE.
 
 ## Limitations
