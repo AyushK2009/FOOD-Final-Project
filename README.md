@@ -1,6 +1,11 @@
+### FOOD Final
+
+To Infinity and Beyond! Simulating a Rocket Travelling Through Space and Planets 
+Team Members: Donald Morris, Ayush Kamath
+
 ## Overview
 
-Our project is a physics-based simulation of a rocket going through space from the launch from one celestial body to the landing on another(Pick between Earth, Moon, Mars). We selected this idea because of the unique variables we could change, like gravity, air resistance, mass of the rocket, and how much fuel the rocket has. The target audience would be those attempting to learn more about rockets and resource management, as it is meant to show how well the rocket will do with the given amount of fuel. The user will interact with the rocket by inserting the planet of take-off, how much fuel there is, and the planet of landing, all through the terminal. As the rocket moves, the program prints updates about what stage it's in (liftoff, coasting through space, or landing), and at the end shows graphs of how the rocket moved over time. The simulation runs in 1-D, so the path between two planets is treated as a straight line. 
+Our project is a physics-based simulation of a rocket going through space from the launch from one celestial body to the landing on another(Pick between Earth, Moon, Mars). We selected this idea because of the unique variables we could change, like gravity, air resistance, mass of the rocket, and how much fuel the rocket has. The target audience would be those attempting to learn more about rockets and resource management, as it is meant to show how well the rocket will do with the given amount of fuel. The user will interact with the rocket by inserting the planet of take-off, how much fuel there is, and the planet of landing, all through the terminal. As the rocket moves, the program prints updates about what stage it's in (liftoff, coasting through space, or landing), and at the end shows graphs of how the rocket moved over time. The simulation runs in 1-D, so the path between two planets is treated as a straight line. This rocket is useful for those interested in space-flight as it provides useful information about the amount of fuel needed for a rocket and how long the trip would take. 
 
 ## Features
 
