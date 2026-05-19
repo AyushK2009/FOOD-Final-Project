@@ -1,6 +1,6 @@
 public class States {
 
-    public static final double atmosphereTop = 100000.0; // m, decides when state transitions happen
+    public static final double atmosphereTop = 25000.0; // m, decides when state transitions happen
 
     // Each Planet is assigned its own physical constants accoridng to the accepted physics values
     public enum Planet {
@@ -24,6 +24,9 @@ public class States {
     public enum Stage {
         ONE, TWO, THREE; // Liftoff, cruise, landing
 
+        // Small background force on the rocket during cruise, representing average space environment effects 
+        private static final double cruiseExternalForce = -1000.0;
+
         // Calculates net force to be used within simulation. This way, simulation doesn't need a bunch of if statements checking the stage and corresponding force
         public double calculateForce(double mass, double gravity, double drag, double thrust) {
             switch (this) {
@@ -31,8 +34,8 @@ public class States {
                     // Launch: thrust forward, gravity back, drag back
                     return thrust - (mass * gravity) + drag;
                 case TWO:
-                    // Cruise: no forces in space
-                    return 0.0;
+                    // Cruise: small constant external force (see cruiseExternalForce above)
+                    return cruiseExternalForce;
                 case THREE:
                     // Landing: gravity pulls toward destination, drag opposes motion
                     return (mass * gravity) + drag;
@@ -59,7 +62,7 @@ public class States {
         this.displayScale = displayScaleFor(location, destination);
     }
 
-    // Called by Simulate every time step. Checks whet
+    // Called by Simulate every time step. Checks when the conditions and executes when state transition should occur
     public void updateState(double position, double currentTime) {
         // Takeoff to Crusie transition
         if (stage == Stage.ONE && position > atmosphereTop) {

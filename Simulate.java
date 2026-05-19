@@ -5,16 +5,14 @@ public class Simulate {
     // Rocket constants
     public static final double rocketMass = 50000.0;     // kg
     public static final double crossArea = 10.0;         // m^2, frontal area
-    public static final double dragCoefficient = 0.75;   // unitless
-    public static final double thrustForce = 1500000.0;  // Newtons (launch only)
-    public static final double burnRate = 5.0;           // liters of fuel per second
+    public static final double dragCoefficient = 0.3;    // unitless
+    public static final double thrustForce = 1000000.0;  // Newtons (launch only)
+    public static final double burnRate = 15.0;           // liters of fuel per second
 
     // Simulation timing
     public static final double dt = 0.1;       // internal time step in seconds
     public static final double tMax = 100000;  // safety cap on sim time
 
-    // The simulation owns a rocket and consults a States object for everything
-    // related to the state machine (current stage, gravity, air density, etc).
     private Rocket rocket;
     private States states;
 
@@ -28,10 +26,20 @@ public class Simulate {
     private boolean crashed = false;
     private boolean landed = false;
 
+    // Indices track when state changes (for later graphing). Initialized at -1 if never occurred (i.e crashes or bugs)
+    private int stage1to2Index = -1;
+    private int stage2to3Index = -1;
+
     public Simulate(States states, double fuel) {
         this.states = states;
         this.rocket = new Rocket(rocketMass, fuel);
     }
+
+    // Initialized for GraphPanel so it can read the trajectory data after the run finishes.
+    public ArrayList<Double> getTimes() { return times; }
+    public ArrayList<Double> getPositions() { return positions; }
+    public int getStage1to2Index() { return stage1to2Index; }
+    public int getStage2to3Index() { return stage2to3Index; }
 
     public void run() {
         double t = 0.0;
@@ -71,9 +79,17 @@ public class Simulate {
                 break;
             }
 
-            // States object checks if a transition should occur.
+            // States object checks if a transition should occur
             states.updateState(rocket.getPosition(), t);
 
+            // If a stage transition just occurred, record the index where the new stage begins
+            if (states.getStage() != stage) {
+                if (states.getStage() == States.Stage.TWO) {
+                    stage1to2Index = times.size();
+                } else if (states.getStage() == States.Stage.THREE) {
+                    stage2to3Index = times.size();
+                }
+            }
             t = t + dt;
         }
 
