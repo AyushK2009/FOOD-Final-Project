@@ -57,5 +57,6 @@ The program currently only holds three planets (Earth, Moon, Mars) and the simul
 2. Input one of available planets (MARS, MOON, or EARTH) as the rocket's start location.
 3. Input a DIFFERENT planet (MARS, MOON, or EARTH) as the rocket's ending location.
 4. Input the amount of fuel (in L) the rocket has.
-5. Observe the printed data about the rocket's journey.
-6. Input the word "yes" to run the simulation again or the word "no" to exit the simulation. If you inputted "yes", start from the step 2.
+5. Observe the printed data about the rocket's journey and the graph window.
+6. Close the graoh window and return to the terminal.
+7. Input the word "yes" to run the simulation again or the word "no" to exit the simulation. If you inputted "yes", start from the step 2.
