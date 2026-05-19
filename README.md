@@ -1,6 +1,7 @@
 # FOOD Final
 
 To Infinity and Beyond! Simulating a Rocket Travelling Through Space and Planets 
+
 Team Members: Donald Morris, Ayush Kamath
 
 ## Overview
