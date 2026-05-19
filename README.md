@@ -13,12 +13,13 @@ Our project is a physics-based simulation of a rocket going through space from t
 2. A detailed list of when the rocket does things like exit orbit, re-enter orbit, and land.
 3. Printed results on if the rocket successfully made it to it's destination.
 4. A graph showing the path of the rocket on a 1D scale.
-5. Tracks the usage of fuel and crashes the ship if it ever reaches 0.
+> Done in 3 stages, opens a separate window for the graph.
+6. Tracks the usage of fuel and crashes the ship if it ever reaches 0.
 > This has been done differently than mentioned in the proposal, now use a method in simulation while the state is in STAGE ONE.
 
 ## Limitations
 
-The program currently only holds a few planets and has a rough print method for the graph.
+The program currently only holds a few planets.
 
 ## User Guide
 
@@ -26,5 +27,6 @@ The program currently only holds a few planets and has a rough print method for 
 2. Input one of available planets (MARS, MOON, or EARTH) as the rocket's start location.
 3. Input a DIFFERENT planet (MARS, MOON, or EARTH) as the rocket's ending location.
 4. Input the amount of fuel (in L) the rocket has.
-5. Observe the printed data about the rocket's journey.
-6. Input the word "yes" to run the simulation again or the word "no" to exit the simulation. If you inputted "yes", start from the step 2.
+5. Observe the printed data about the rocket's journey and the graph window.
+6. Close the graoh window and return to the terminal.
+7. Input the word "yes" to run the simulation again or the word "no" to exit the simulation. If you inputted "yes", start from the step 2.
