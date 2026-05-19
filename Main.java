@@ -28,6 +28,7 @@ public class Main {
                 States states = new States(location, destination);
                 Simulate simulation = new Simulate(states, fuelInput);
                 simulation.run();
+                simulation.printConsoleGraph();
 
                 /*
                 Creating graphs: Swing uses "event-driven programming," something we haven't really covered in class 
